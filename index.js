@@ -138,7 +138,7 @@ class CSGOCdn extends EventEmitter {
                 if (this.config.isMaster) {
                     this.update();
                 } else {
-                    this.log.warn('Not master. Will retry again in 30 seconds.');
+                    this.log.warn(`Not master. Will retry again in ${this.config.slaveRetryInterval/1000} seconds. Retries: ${this.config.slaveRetry}/${this.config.slaveMaxRetry}`);
                     this.slaveRetry++;
                     if (this.slaveRetry < this.config.slaveMaxRetry) {
                         setTimeout(() => {
