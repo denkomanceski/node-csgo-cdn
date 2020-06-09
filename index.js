@@ -16,7 +16,10 @@ const defaultConfig = {
     cases: true,
     tools: true,
     statusIcons: true,
-    logLevel: 'info'
+    logLevel: 'info',
+    isMaster: false,
+    slaveMaxRetry: 20,
+    slaveRetryInterval: 20 * 1000
 };
 
 const wears = ['Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred'];
@@ -36,6 +39,8 @@ function bytesToMB(bytes) {
 }
 
 class CSGOCdn extends EventEmitter {
+
+
     get ready() {
         return this.ready_ || false;
     }
@@ -69,7 +74,7 @@ class CSGOCdn extends EventEmitter {
 
     constructor(steamUser, config={}) {
         super();
-
+        this.slaveRetry = 0;
         this.config = Object.assign(defaultConfig, config);
 
         this.createDataDirectory();
@@ -130,7 +135,21 @@ class CSGOCdn extends EventEmitter {
                 this.ready = true;
             } catch(e) {
                 this.log.warn('Needed CS:GO files not installed');
-                this.update();
+                if (this.config.isMaster) {
+                    this.update();
+                } else {
+                    this.log.warn('Not master. Will retry again in 30 seconds.');
+                    this.slaveRetry++;
+                    if (this.slaveRetry < this.config.slaveMaxRetry) {
+                        setTimeout(() => {
+                            this.updateLoop();
+                        }, this.config.slaveRetryInterval)
+                    } else {
+                        this.log.warn("I stopped retrying. Something is probably wrong")
+                    }
+
+                }
+
             }
         }
     }
