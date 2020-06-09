@@ -135,6 +135,7 @@ class CSGOCdn extends EventEmitter {
                 this.ready = true;
             } catch(e) {
                 this.log.warn('Needed CS:GO files not installed');
+                console.error(e);
                 if (this.config.isMaster) {
                     this.update();
                 } else {
